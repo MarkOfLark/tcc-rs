@@ -1,26 +1,33 @@
-extern crate tcc;
+extern crate time;
 extern crate getopts;
+extern crate tcc;
+
+use std::os::args;
+use time::{Timespec};
 use getopts::{optopt,optflag,getopts,OptGroup,usage};
+
+
 
 fn main() {
     // Get time right away so that printed time does not reflect
     // time spent parsing arguments and formatting
-    let t = tcc::now();
+    let ts = tcc::now();
+    let t = tcc::Time::now(tcc::Yearbase(None));
 
     // Get options from command line arguments
     let opts = &[
         optflag("h", "help", "print this help menu"),
-        optopt("y","year-base","Integer representing the year base","NUMBER"),
+        optopt("Y","year-base","Integer representing the year base","NUMBER"),
         optopt("Q","mod-quarter","Integer representing the datemod for quarters","NUMBER"),
         optopt("L","mod-luna","Integer representing the datemod for lunas","NUMBER"),
         optopt("W","mod-week","Integer representing the datemod for weeks","NUMBER"),
         optopt("D","mod-day","Integer representing the datemod for days","NUMBER"),
-        optopt("H","mod-hour","Integer representing the datemod for hours","NUMBER"),
+        optopt("R","mod-hour","Integer representing the datemod for hours","NUMBER"),
         optopt("M","mod-minute","Integer representing the datemod for minutes","NUMBER")
     ];
    
 
-    let matches = match getopts(std::os::args().tail(), opts) {
+    let matches = match getopts(args().tail(), opts) {
         Ok(m) => { m }
         Err(f) => { panic!(f.to_string()) }
     };
@@ -31,8 +38,9 @@ fn main() {
         return;
     }
 
+    println!("The current timestamp: {}",ts);
+    println!("The beginning timestamp: {}",tcc::at(Timespec{sec: tcc::EPOCH, nsec: 0}));
 
-
-    println!("{}",t);
-
+    println!("The current time: {}",t);
+    println!("The beginning time: {}",tcc::Time::at(Timespec{sec: tcc::EPOCH, nsec: 0},tcc::Yearbase(None)));
 }

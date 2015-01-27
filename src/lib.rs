@@ -4,23 +4,16 @@
 
 extern crate time;
 
-#[test]
-fn it_works() {
-}
+pub static EPOCH: i64 = 864000;
+
+pub struct Yearbase(pub Option<u64>);
 
 pub struct Timestamp {
     ts: i64,
 }
 
-pub struct TCDate {
-    year: i64,
-    month: i8,
-    day: i8,
-    hour: i8,
-    minute: i8,
-    second: i8,
-    nano_second: i32,
-    year_base: u64,
+pub struct Calendar {
+    delimiter: char,
     mod_quarter: i64,
     mod_month: i64,
     mod_week: i64,
@@ -30,43 +23,86 @@ pub struct TCDate {
     mod_second: i64,
 }
 
-pub fn now() -> Timestamp{
-    let utc = time::get_time();
-    Timestamp{ts:utc.sec - 864000}
+pub struct Time {
+    year: i64,
+    month: i8,
+    day: i8,
+    hour: i8,
+    minute: i8,
+    second: i8,
+    nano_second: i32,
+    year_base: Yearbase,
 }
 
-    /*
-    let mut ts : i64 = utc.sec -864000;
-    let year = ts / (60*60*24*28*13);
-    ts = ts - year*13*28*24*60*60;
-    let mon = ts / (60*60*24*28);
-    ts = ts - mon*28*24*60*60;
-    let day = ts / (60*60*24);
-    ts = ts - day*24*60*60;
-    let hour = ts / (60*60);
-    ts = ts - hour*60*60;
-    let min = ts / 60;
-    ts = ts - min*60;
+pub fn now() -> Timestamp {
+    let utc = time::get_time();
+    Timestamp {ts:utc.sec - EPOCH}
+}
 
-    TCDate{year: year as i64,
-           month: mon as i8,
-           day: day as i8,
-           hour: hour as i8,
-           minute: min as i8,
-           second: ts as i8,
-           nano_second: utc.nsec as i32,
-           year_base: 0u64,
-           mod_quarter: 0i64,
-           mod_month: 0i64,
-           mod_week: 0i64,
-           mod_day: 0i64,
-           mod_hour: 0i64,
-           mod_minute: 0i64,
-           mod_second: 0i64}
-           */
+pub fn at(utc : time::Timespec) -> Timestamp {
+    Timestamp {ts : utc.sec - EPOCH}
+}
+
+impl Time {
+    fn new(utc : time::Timespec, year_base : Yearbase) -> Time {
+        let mut ts : i64 = utc.sec -864000;
+        let year = ts / (60*60*24*28*13);
+        ts = ts - year*13*28*24*60*60;
+        let mon = ts / (60*60*24*28);
+        ts = ts - mon*28*24*60*60;
+        let day = ts / (60*60*24);
+        ts = ts - day*24*60*60;
+        let hour = ts / (60*60);
+        ts = ts - hour*60*60;
+        let min = ts / 60;
+        ts = ts - min*60;
+        
+        Time{year: year as i64,
+             month: mon as i8,
+             day: day as i8,
+             hour: hour as i8,
+             minute: min as i8,
+             second: ts as i8,
+             nano_second: utc.nsec as i32,
+             year_base: year_base}
+    }
+
+    pub fn now(year_base : Yearbase) -> Time {
+        let utc = time::get_time();
+        Time::new(utc,year_base)
+    }
+
+    pub fn at (utc : time::Timespec, year_base : Yearbase) -> Time {
+        Time::new(utc,year_base)
+    }
+}
+
 
 impl std::fmt::Display for Timestamp {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f,"TC+{}",self.ts)
+    }
+}
+
+
+impl std::fmt::Display for Time {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+
+        let Yearbase(ybo) = self.year_base;
+        let yb = match ybo {
+            Some(value) => format!("TC{}",value),
+            None        => "".to_string(),
+        };
+
+        let sec = self.second as f64 + 1e-9*(self.nano_second as f64);
+
+        write!(f,"{}.{}.{},{}.{}.{} TC{}",
+                 self.year,
+                 self.month,
+                 self.day,
+                 self.hour,
+                 self.minute,
+                 sec,
+                 yb)
     }
 }
