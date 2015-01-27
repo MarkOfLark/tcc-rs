@@ -8,6 +8,9 @@ extern crate time;
 fn it_works() {
 }
 
+pub struct Timestamp {
+    ts: i64,
+}
 
 pub struct TCDate {
     year: i64,
@@ -27,9 +30,12 @@ pub struct TCDate {
     mod_second: i64,
 }
 
-pub fn now() -> TCDate{
+pub fn now() -> Timestamp{
     let utc = time::get_time();
+    Timestamp{ts:utc.sec - 864000}
+}
 
+    /*
     let mut ts : i64 = utc.sec -864000;
     let year = ts / (60*60*24*28*13);
     ts = ts - year*13*28*24*60*60;
@@ -57,17 +63,10 @@ pub fn now() -> TCDate{
            mod_hour: 0i64,
            mod_minute: 0i64,
            mod_second: 0i64}
-}
+           */
 
-impl std::fmt::Display for TCDate {
+impl std::fmt::Display for Timestamp {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f,"{}.{}.{},{}.{}:{} TC{}",
-               self.year,
-               self.month,
-               self.day,
-               self.hour,
-               self.minute,
-               self.second as f64 + 1e-9*(self.nano_second as f64),
-               self.year_base)
+        write!(f,"TC+{}",self.ts)
     }
 }
