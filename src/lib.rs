@@ -3,6 +3,7 @@
 #![crate_type = "lib"]
 
 extern crate time;
+use std::default::Default;
 
 pub static EPOCH: i64 = 864000;
 
@@ -12,8 +13,16 @@ pub struct Timestamp {
     ts: i64,
 }
 
+#[derive(Clone,Default)]
 pub struct Calendar {
-    delimiter: char,
+    year_sign: bool,
+    delim_month: char,
+    delim_day: char,
+    delim_hour: char,
+    delim_minute: char,
+    delim_second: char,
+    delim_desig: Option<char>,
+
     mod_quarter: i64,
     mod_month: i64,
     mod_week: i64,
@@ -42,6 +51,43 @@ pub fn now() -> Timestamp {
 pub fn at(utc : time::Timespec) -> Timestamp {
     Timestamp {ts : utc.sec - EPOCH}
 }
+
+
+impl Calendar {
+    pub fn new() -> Calendar {
+        let cal: Calendar = Default::default();
+        cal
+    }
+
+    pub fn at(&self, t : Time) -> String {
+        t.to_string()
+    }
+
+    pub fn force_year_sign(&mut self, force : bool) -> Calendar {
+        self.year_sign = force;
+        (*self).clone()
+    }
+
+    pub fn month_delimiter(&mut self, delim: char) -> Calendar {
+        self.delim_month = delim;
+        (*self).clone()
+    }
+
+    pub fn designator_delimiter(&mut self, delim: Option<char>) -> Calendar {
+        self.delim_desig = delim;
+        (*self).clone()
+    }
+}
+
+/* TODO see http://internals.rust-lang.org/t/orphan-rules/1322
+impl collections::string::ToString for Calendar {
+    pub fn to_string(&self) -> String {
+        self.at(Time::at(time::Timespec{sec: EPOCH, nsec: 0},Yearbase(None)));
+    }
+}
+*/
+
+
 
 impl Time {
     fn new(utc : time::Timespec, year_base : Yearbase) -> Time {
@@ -104,5 +150,12 @@ impl std::fmt::Display for Time {
                  self.minute,
                  sec,
                  yb)
+    }
+}
+
+impl std::fmt::Display for Calendar {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        // TODO: insert formatting function here
+        write!(f,"{}",self.at(Time::at(time::Timespec{sec: EPOCH, nsec: 0},Yearbase(None))))
     }
 }

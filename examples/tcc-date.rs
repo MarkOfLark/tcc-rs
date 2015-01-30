@@ -13,8 +13,14 @@ fn main() {
     // time spent parsing arguments and formatting
     let ts = tcc::now();
     let t = tcc::Time::now(tcc::Yearbase(None));
+    
+    println!("The current timestamp: {}",ts);
+    println!("The beginning timestamp: {}",tcc::at(Timespec{sec: tcc::EPOCH, nsec: 0}));
 
-    // Get options from command line arguments
+    println!("The current time: {}",t);
+    println!("The beginning time: {}",tcc::Time::at(Timespec{sec: tcc::EPOCH, nsec: 0},tcc::Yearbase(None)));
+
+    // Get options from command line arguments in order to build Calendar
     let opts = &[
         optflag("h", "help", "print this help menu"),
         optopt("Y","year-base","Integer representing the year base","NUMBER"),
@@ -38,9 +44,11 @@ fn main() {
         return;
     }
 
-    println!("The current timestamp: {}",ts);
-    println!("The beginning timestamp: {}",tcc::at(Timespec{sec: tcc::EPOCH, nsec: 0}));
+    let mut c = tcc::Calendar::new().
+                               force_year_sign(true).
+                               month_delimiter('/').
+                               designator_delimiter(None);
 
-    println!("The current time: {}",t);
-    println!("The beginning time: {}",tcc::Time::at(Timespec{sec: tcc::EPOCH, nsec: 0},tcc::Yearbase(None)));
+    println!("Calendar: {}",c);
+    
 }
