@@ -14,7 +14,9 @@ pub struct Timestamp {
 }
 
 #[derive(Clone,Default)]
+/// Object for formatting TCC timestamps
 pub struct Calendar {
+    /// Indicates if the sign (+/-) should always be displayed before the year feild.
     year_sign: bool,
     delim_month: char,
     delim_day: char,
@@ -52,6 +54,12 @@ pub fn at(utc : time::Timespec) -> Timestamp {
     Timestamp {ts : utc.sec - EPOCH}
 }
 
+    fn acceptable_delimiter(delim: char) -> bool {
+        match delim {
+            ','|'/'|' '|'_'|':'|'.' => true,
+                                  _ => false,
+        } 
+    }
 
 impl Calendar {
     pub fn new() -> Calendar {
@@ -69,14 +77,51 @@ impl Calendar {
     }
 
     pub fn month_delimiter(&mut self, delim: char) -> Calendar {
-        self.delim_month = delim;
+        if acceptable_delimiter(delim) {
+            self.delim_month = delim;
+        }
+        (*self).clone()
+    }
+
+    pub fn day_delimiter(&mut self, delim: char) -> Calendar {
+        if acceptable_delimiter(delim) {
+            self.delim_day = delim;
+        }
+        (*self).clone()
+    }
+
+    pub fn hour_delimiter(&mut self, delim: char) -> Calendar {
+        if acceptable_delimiter(delim) {
+            self.delim_hour = delim;
+        }
+        (*self).clone()
+    }
+
+    pub fn minute_delimiter(&mut self, delim: char) -> Calendar {
+        if acceptable_delimiter(delim) {
+            self.delim_minute = delim;
+        }
+        (*self).clone()
+    }
+
+    pub fn second_delimiter(&mut self, delim: char) -> Calendar {
+        if acceptable_delimiter(delim) {
+            self.delim_second = delim;
+        }
         (*self).clone()
     }
 
     pub fn designator_delimiter(&mut self, delim: Option<char>) -> Calendar {
-        self.delim_desig = delim;
+        self.delim_desig = match delim {
+            Some(d) => match acceptable_delimiter(d) {
+                true => delim,
+                false => self.delim_desig,
+            },
+            None => delim,
+        };
         (*self).clone()
     }
+
 }
 
 /* TODO see http://internals.rust-lang.org/t/orphan-rules/1322
