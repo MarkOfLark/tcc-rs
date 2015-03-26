@@ -18,13 +18,20 @@ pub struct Timestamp {
 pub struct Calendar {
     /// Indicates if the sign (+/-) should always be displayed before the year feild.
     year_sign: bool,
+    /// Delimiter that comes between the year and month
     delim_month: char,
+    /// Delimiter that comes between the month and day
     delim_day: char,
+    /// Delimiter that comes between the day and hour
     delim_hour: char,
+    /// Delimiter that comes between the hour and minute
     delim_minute: char,
+    /// Delimiter that comes between the minute and second
     delim_second: char,
+    /// Delimiter that comes between the second and year base designator
     delim_desig: Option<char>,
 
+    /// fields to hold the date mod
     mod_quarter: i64,
     mod_month: i64,
     mod_week: i64,
@@ -45,21 +52,21 @@ pub struct Time {
     year_base: Yearbase,
 }
 
-pub fn now() -> Timestamp {
+pub fn timestamp_now() -> Timestamp {
     let utc = time::get_time();
     Timestamp {ts:utc.sec - EPOCH}
 }
 
-pub fn at(utc : time::Timespec) -> Timestamp {
+pub fn timestamp_at(utc : time::Timespec) -> Timestamp {
     Timestamp {ts : utc.sec - EPOCH}
 }
 
-    fn acceptable_delimiter(delim: char) -> bool {
-        match delim {
-            ','|'/'|' '|'_'|':'|'.' => true,
-                                  _ => false,
-        } 
-    }
+fn acceptable_delimiter(delim: char) -> bool {
+    match delim {
+        ','|'/'|' '|'_'|':'|'.' => true,
+                              _ => false,
+    } 
+}
 
 impl Calendar {
     pub fn new() -> Calendar {
@@ -67,7 +74,8 @@ impl Calendar {
         cal
     }
 
-    pub fn at(&self, t : Time) -> String {
+    pub fn calendar_at(&self, t : Time) -> String {
+        // TODO apply formatting
         t.to_string()
     }
 
@@ -124,14 +132,6 @@ impl Calendar {
 
 }
 
-/* TODO see http://internals.rust-lang.org/t/orphan-rules/1322
-impl collections::string::ToString for Calendar {
-    pub fn to_string(&self) -> String {
-        self.at(Time::at(time::Timespec{sec: EPOCH, nsec: 0},Yearbase(None)));
-    }
-}
-*/
-
 
 
 impl Time {
@@ -147,7 +147,9 @@ impl Time {
         ts = ts - hour*60*60;
         let min = ts / 60;
         ts = ts - min*60;
-        
+       
+        // TODO factor in leaps based on yearbase
+
         Time{year: year as i64,
              month: mon as i8,
              day: day as i8,
@@ -158,12 +160,12 @@ impl Time {
              year_base: year_base}
     }
 
-    pub fn now(year_base : Yearbase) -> Time {
+    pub fn time_now(year_base : Yearbase) -> Time {
         let utc = time::get_time();
         Time::new(utc,year_base)
     }
 
-    pub fn at (utc : time::Timespec, year_base : Yearbase) -> Time {
+    pub fn time_at (utc : time::Timespec, year_base : Yearbase) -> Time {
         Time::new(utc,year_base)
     }
 }
@@ -200,7 +202,6 @@ impl std::fmt::Display for Time {
 
 impl std::fmt::Display for Calendar {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        // TODO: insert formatting function here
-        write!(f,"{}",self.at(Time::at(time::Timespec{sec: EPOCH, nsec: 0},Yearbase(None))))
+        write!(f,"{}",self.calendar_at(Time::time_at(time::Timespec{sec: EPOCH, nsec: 0},Yearbase(None))))
     }
 }

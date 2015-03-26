@@ -11,14 +11,14 @@ use getopts::{optopt,optflag,getopts,OptGroup,usage};
 fn main() {
     // Get time right away so that printed time does not reflect
     // time spent parsing arguments and formatting
-    let ts = tcc::now();
-    let t = tcc::Time::now(tcc::Yearbase(None));
+    let ts = tcc::timestamp_now();
+    let t = tcc::Time::time_now(tcc::Yearbase(None));
     
     println!("The current timestamp: {}",ts);
-    println!("The beginning timestamp: {}",tcc::at(Timespec{sec: tcc::EPOCH, nsec: 0}));
+    println!("The beginning timestamp: {}",tcc::timestamp_at(Timespec{sec: tcc::EPOCH, nsec: 0}));
 
     println!("The current time: {}",t);
-    println!("The beginning time: {}",tcc::Time::at(Timespec{sec: tcc::EPOCH, nsec: 0},tcc::Yearbase(None)));
+    println!("The beginning time: {}",tcc::Time::time_at(Timespec{sec: tcc::EPOCH, nsec: 0},tcc::Yearbase(None)));
 
     // Get options from command line arguments in order to build Calendar
     let opts = &[
