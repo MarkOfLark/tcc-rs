@@ -54,11 +54,11 @@ pub struct Time {
 
 pub fn timestamp_now() -> Timestamp {
     let utc = time::get_time();
-    Timestamp {ts:utc.sec - EPOCH}
+    Timestamp {ts:utc.sec + EPOCH}
 }
 
 pub fn timestamp_at(utc : time::Timespec) -> Timestamp {
-    Timestamp {ts : utc.sec - EPOCH}
+    Timestamp {ts : utc.sec + EPOCH}
 }
 
 fn acceptable_delimiter(delim: char) -> bool {
