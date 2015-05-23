@@ -2,10 +2,16 @@ extern crate time;
 extern crate getopts;
 extern crate tcc;
 
-use std::os::args;
 use time::{Timespec};
-use getopts::{optopt,optflag,getopts,OptGroup,usage};
+use getopts::Options;
+use std::env;
 
+
+
+fn print_usage(program: &str, opts: Options) {
+    let brief = format!("Usage: {} [options]",program);
+    print!("{}", opts.usage(&brief));
+}
 
 
 fn main() {
@@ -13,7 +19,7 @@ fn main() {
     // time spent parsing arguments and formatting
     let ts = tcc::timestamp_now();
     let t = tcc::Time::time_now(tcc::Yearbase(None));
-    
+
     println!("The current timestamp: {}",ts);
     println!("The beginning timestamp: {}",tcc::timestamp_at(Timespec{sec: tcc::EPOCH, nsec: 0}));
 
@@ -21,26 +27,26 @@ fn main() {
     println!("The beginning time: {}",tcc::Time::time_at(Timespec{sec: tcc::EPOCH, nsec: 0},tcc::Yearbase(None)));
 
     // Get options from command line arguments in order to build Calendar
-    let opts = &[
-        optflag("h", "help", "print this help menu"),
-        optopt("Y","year-base","Integer representing the year base","NUMBER"),
-        optopt("Q","mod-quarter","Integer representing the datemod for quarters","NUMBER"),
-        optopt("L","mod-luna","Integer representing the datemod for lunas","NUMBER"),
-        optopt("W","mod-week","Integer representing the datemod for weeks","NUMBER"),
-        optopt("D","mod-day","Integer representing the datemod for days","NUMBER"),
-        optopt("R","mod-hour","Integer representing the datemod for hours","NUMBER"),
-        optopt("M","mod-minute","Integer representing the datemod for minutes","NUMBER")
-    ];
-   
+    let mut opts = Options::new();
+    opts.optflag("h", "help", "print this help menu");
+    opts.optopt("Y","year-base","Integer representing the year base","NUMBER");
+    opts.optopt("Q","mod-quarter","Integer representing the datemod for quarters","NUMBER");
+    opts.optopt("L","mod-luna","Integer representing the datemod for lunas","NUMBER");
+    opts.optopt("W","mod-week","Integer representing the datemod for weeks","NUMBER");
+    opts.optopt("D","mod-day","Integer representing the datemod for days","NUMBER");
+    opts.optopt("R","mod-hour","Integer representing the datemod for hours","NUMBER");
+    opts.optopt("M","mod-minute","Integer representing the datemod for minutes","NUMBER");
 
-    let matches = match getopts(args().tail(), opts) {
+    let args: Vec<String> = env::args().collect();
+    let program = args[0].clone();
+
+    let matches = match opts.parse(&args[1..]) {
         Ok(m) => { m }
         Err(f) => { panic!(f.to_string()) }
     };
 
     if matches.opt_present("h") {
-        print!("{}", usage("tcc-date", opts));
-        println!("\nExample: tcc-date -h 5");
+        print_usage(&program, opts);
         return;
     }
 
@@ -49,6 +55,7 @@ fn main() {
                                month_delimiter('/').
                                designator_delimiter(None);
 
+
     println!("Calendar: {}",c);
-    
+
 }
